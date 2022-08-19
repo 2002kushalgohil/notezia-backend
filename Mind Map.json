@@ -1,0 +1,76 @@
+{
+  "name": "Notezia",
+  "description": "Google Keep type",
+  "technologies": {
+    "Front-End": [
+      "Next JS",
+      "Redux Toolkit",
+      "Material UI",
+      "Tailwind CSS",
+      "Framer Motion"
+    ],
+    "Back-End": [
+      "Node JS",
+      "Express JS",
+      "Passport JS",
+      "MongoDB",
+      "Cloudinary"
+    ]
+  },
+  "colors": {
+    "main": {
+      "primary": "#ffffff",
+      "primary-background": "#f1f3f4",
+      "text-color": "#202124"
+    },
+    "Cards": [
+      "#f28b82",
+      "#fbbc04",
+      "#fff475",
+      "#ccff90",
+      "#a7ffeb",
+      "#cbf0f8",
+      "#aecbfa",
+      "#d7aefb",
+      "#fdcfe8",
+      "#e6c9a8",
+      "#e8eaed"
+    ]
+  },
+  "features": {
+    "Notes": {
+      "Options": "Can add checkbox, Note or draw on the card",
+      "Images": "Can Assign Images to the card",
+      "Color-Assigning": "Assign color to the note from the given options",
+      "Label": "Can create a label and add the card in the label",
+      "Collaborators": "Can add a gmail address and assign a person to the card",
+      "Last-Edited": "Show when was this card last edited",
+      "Pin-Card": "Can Pin a card to show all the pin cards in different section",
+      "CRUD": "Creating, Reading, Updating, Deleting and Duplicate",
+      "profilePhoto": "Upload profile photo or can select from the animated avatars"
+    }
+  },
+  "models": {
+    "user": {
+      "_id": "ObjectId",
+      "email": "String",
+      "password": "String",
+      "name": "String",
+      "photo": "URL",
+      "createdAt": "Date",
+      "forgotPasswordToken": "String",
+      "forgotPasswordExpiry": "Date"
+    },
+    "card": {
+      "_id": "ObjectId",
+      "createdBy": ["ObjectId", "ObjectId"],
+      "title": "String",
+      "description": "String",
+      "imageUrl": ["URL", "URL"],
+      "isPinned": "Boolean",
+      "bgColor": "String",
+      "label": "String",
+      "lastEdited": "Date"
+    }
+  }
+}
