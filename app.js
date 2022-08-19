@@ -1,11 +1,10 @@
 const express = require("express");
-// dotenv initialization
+
 require("dotenv").config();
 const app = express();
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 
-// middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -16,10 +15,8 @@ app.use(
   })
 );
 
-// import routes
-const home = require("./routes/homeRoute");
+const user = require("./routes/userRoute");
 
-// routes middleware
-app.use("/api/v1/", home);
+app.use("/api/v1/user/", user);
 
 module.exports = app;

@@ -57,9 +57,9 @@
       "password": "String",
       "name": "String",
       "photo": "URL",
-      "createdAt": "Date",
       "forgotPasswordToken": "String",
-      "forgotPasswordExpiry": "Date"
+      "forgotPasswordExpiry": "Date",
+      "createdAt": "Date"
     },
     "card": {
       "_id": "ObjectId",
