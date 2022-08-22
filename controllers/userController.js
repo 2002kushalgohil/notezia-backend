@@ -1,122 +1,97 @@
 const GlobalPromise = require("../middlewares/globalPromise");
 const User = require("../models/userModel");
-const cloudinary = require("cloudinary");
-const {
-  EmptyFieldRes,
-  UserExistRes,
-  UserDoesNotExistRes,
-  InvalidCredRes,
-  SomethingWentWrong,
-  PasswordDoesNotMatch,
-  TokenExpired,
-} = require("../utils/responses");
-const mailHelper = require("../utils/emailHelper");
+
+const { customResponse } = require("../utils/responses");
+const emailSender = require("../utils/emailSender");
+const { imageUploader, imageDestroyer } = require("../utils/imageHelper");
 
 exports.signup = GlobalPromise(async (req, res) => {
   const { email, password, name } = req.body;
 
   if (!(email && password && name && req.files)) {
-    return EmptyFieldRes(res);
+    return customResponse(res, 400, "Please fill all the details");
   }
 
   if (await User.findOne({ email })) {
-    return UserExistRes(res);
+    return customResponse(res, 400, "User already registered");
   }
 
-  const response = await cloudinary.v2.uploader.upload(
-    req.files.photo.tempFilePath,
-    {
-      folder: "users",
-      width: 150,
-      crop: "scale",
-    }
-  );
-  req.body.photo = { id: response.public_id, secure_url: response.secure_url };
+  const response = await imageUploader(req, {
+    folder: "users",
+    width: 150,
+    crop: "scale",
+  });
+
+  req.body.photos = {
+    id: response[0].id,
+    secure_url: response[0].secure_url,
+  };
+
+  console.log(req.body.photos);
 
   const user = await User.create(req.body);
   const token = user.generateJWT();
   user.password = undefined;
 
-  res.status(201).json({
-    status: 201,
-    success: true,
-    token,
-    user,
-  });
+  const data = { token, user };
+  customResponse(res, 201, "User Registered successfully", data);
 });
 
 exports.login = GlobalPromise(async (req, res) => {
   const { email, password } = req.body;
 
   if (!(email && password)) {
-    return EmptyFieldRes(res);
+    return customResponse(res, 400, "Please fill all the details");
   }
 
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
-    return UserDoesNotExistRes(res);
+    return customResponse(res, 404, "No user found");
   }
 
   const isPassCorrect = await user.isValidPassword(password);
-
   if (!isPassCorrect) {
-    return InvalidCredRes(res);
+    return customResponse(res, 400, "Invalid credentials");
   }
 
   const token = user.generateJWT();
   user.password = undefined;
+  const data = { token, user };
 
-  res.status(201).json({
-    status: 201,
-    success: true,
-    token,
-    user,
-  });
+  customResponse(res, 200, "Login Successful", data);
 });
 
 exports.forgotPassword = GlobalPromise(async (req, res) => {
   const { email } = req.body;
-
   if (!email) {
-    return res.status(400).json({
-      status: 400,
-      success: false,
-      message: "Please fill all the information",
-    });
+    return customResponse(res, 400, "Please fill all the details");
   }
 
   const user = await User.findOne({ email });
-
   if (!user) {
-    return UserDoesNotExistRes(res);
+    return customResponse(res, 404, "No user found");
   }
 
   const forgotToken = user.getForgotPasswordToken();
   await user.save({ validateBeforeSave: false });
-
   const url = `${req.protocol}://${req.get(
     "host"
   )}/resetpassword/${forgotToken}`;
-
   const message = `Copy paste this link in your URL and hit enter \n \n ${url}`;
 
   try {
-    await mailHelper({
+    await emailSender({
       email: user.email,
       subject: "Password reset email",
       message,
     });
-
-    res.status(200).json({
-      success: true,
-      message: "Email sent",
-    });
+    customResponse(res, 200, "Please check your email to reset your password");
   } catch (error) {
     user.forgotPasswordExpiry = undefined;
     user.forgotPasswordToken = undefined;
     user.save({ validateBeforeSave: true });
-    return SomethingWentWrong(res);
+    return customResponse(res, 400, "Oops! Something went wrong");
   }
 });
 
@@ -129,15 +104,15 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
   });
 
   if (!user) {
-    return TokenExpired(res);
+    return customResponse(res, 400, "Token Expired");
   }
 
   if (!(req.body.password && req.body.confirmpassword)) {
-    return EmptyFieldRes(res);
+    return customResponse(res, 400, "Please fill all the details");
   }
 
   if (req.body.password !== req.body.confirmpassword) {
-    return PasswordDoesNotMatch(res);
+    return customResponse(res, 400, "Passwords does not match");
   }
 
   user.password = req.body.password;
@@ -145,42 +120,32 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
   user.forgotPasswordExpiry = undefined;
   await user.save();
   const jwtToken = user.generateJWT();
+  const data = { jwtToken, user };
 
-  res.status(200).json({
-    success: true,
-    jwtToken,
-    user,
-  });
+  customResponse(res, 200, "Password has been reset successfully", data);
 });
 
 exports.updateProfilePhoto = GlobalPromise(async (req, res) => {
   if (!req.files) {
-    return EmptyFieldRes(res);
+    return customResponse(res, 400, "Please fill all the details");
   }
 
   const user = await User.findById(req.user.id);
-  const imageId = user.photo.id;
 
-  await cloudinary.v2.uploader.destroy(imageId);
+  imageDestroyer(user.photos.id);
 
-  const result = await cloudinary.v2.uploader.upload(
-    req.files.photo.tempFilePath,
-    {
-      folder: "users",
-      width: 150,
-      crop: "scale",
-    }
-  );
+  const response = await imageUploader(req, {
+    folder: "users",
+    width: 150,
+    crop: "scale",
+  });
 
-  user.photo = {
-    id: result.public_id,
-    secure_url: result.secure_url,
+  user.photos = {
+    id: response[0].id,
+    secure_url: response[0].secure_url,
   };
 
   await user.save();
 
-  res.status(200).json({
-    success: true,
-    user,
-  });
+  customResponse(res, 200, "Profile photo updated successfull", user);
 });

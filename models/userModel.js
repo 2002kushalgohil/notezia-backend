@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     maxLength: [40, "Name should be under 40 characters"],
   },
 
-  photo: {
+  photos: {
     id: {
       type: String,
       required: true,

@@ -5,7 +5,7 @@
     "Front-End": [
       "Next JS",
       "Redux Toolkit",
-      "Material UI",
+      "Material UI Or Chakra UI",
       "Tailwind CSS",
       "Framer Motion"
     ],
@@ -18,6 +18,10 @@
     ]
   },
   "colors": {
+    "themes": {
+      "light": {},
+      "dark": {}
+    },
     "main": {
       "primary": "#ffffff",
       "primary-background": "#f1f3f4",
@@ -65,10 +69,10 @@
       "_id": "ObjectId",
       "createdBy": ["ObjectId", "ObjectId"],
       "title": "String",
-      "description": "String",
-      "imageUrl": ["URL", "URL"],
+      "text": "String",
+      "backgroundColor": "String",
+      "photos": ["URL", "URL"],
       "isPinned": "Boolean",
-      "bgColor": "String",
       "label": "String",
       "lastEdited": "Date"
     }

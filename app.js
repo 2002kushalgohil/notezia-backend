@@ -23,7 +23,9 @@ app.use(
 );
 
 const user = require("./routes/userRoute");
+const card = require("./routes/cardRoute");
 
 app.use("/api/v1/user/", user);
+app.use("/api/v1/card/", card);
 
 module.exports = app;
