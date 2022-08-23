@@ -28,9 +28,11 @@ const userSchema = new mongoose.Schema({
   photos: {
     id: {
       type: String,
+      required: true,
     },
     secure_url: {
       type: String,
+      required: true,
     },
   },
 

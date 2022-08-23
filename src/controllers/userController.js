@@ -3,30 +3,16 @@ const User = require("../models/userModel");
 
 const { customResponse } = require("../utils/responses");
 const emailSender = require("../utils/emailSender");
-const { imageUploader, imageDestroyer } = require("../utils/imageHelper");
 
 exports.signup = GlobalPromise(async (req, res) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, photos } = req.body;
 
-  if (!(email && password && name)) {
+  if (!(email && password && name && photos)) {
     return customResponse(res, 400, "Please fill all the details");
   }
 
   if (await User.findOne({ email })) {
     return customResponse(res, 400, "User already registered");
-  }
-
-  if (req.files) {
-    const response = await imageUploader(req, {
-      folder: "users",
-      width: 150,
-      crop: "scale",
-    });
-
-    req.body.photos = {
-      id: response[0].id,
-      secure_url: response[0].secure_url,
-    };
   }
 
   const user = await User.create(req.body);
@@ -126,25 +112,13 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
 });
 
 exports.updateProfilePhoto = GlobalPromise(async (req, res) => {
-  if (!req.files) {
+  const { photos } = req.body;
+  if (!photos) {
     return customResponse(res, 400, "Please fill all the details");
   }
 
   const user = await User.findById(req.user.id);
-
-  imageDestroyer(user.photos.id);
-
-  const response = await imageUploader(req, {
-    folder: "users",
-    width: 150,
-    crop: "scale",
-  });
-
-  user.photos = {
-    id: response[0].id,
-    secure_url: response[0].secure_url,
-  };
-
+  user.photos = photos;
   await user.save();
 
   customResponse(res, 200, "Profile photo updated successfull", user);
