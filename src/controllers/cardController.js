@@ -5,7 +5,7 @@ const { customResponse } = require("../utils/responses");
 const { imageUploader, imageDestroyer } = require("../utils/imageHelper");
 const { isValidId } = require("../utils/isValidId");
 
-exports.createCard = GlobalPromise(async (req, res) => {
+exports.createCard = GlobalPromise(async (req, res) => {    
   validateCardFields(req, res);
 
   if (req.files) {
@@ -15,7 +15,6 @@ exports.createCard = GlobalPromise(async (req, res) => {
   }
 
   req.body.createdBy = [req.user.id];
-  console.log(req.body);
   const card = await Card.create(req.body);
 
   customResponse(res, 201, "Card created successfully", card);

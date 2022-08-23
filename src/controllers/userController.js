@@ -8,7 +8,7 @@ const { imageUploader, imageDestroyer } = require("../utils/imageHelper");
 exports.signup = GlobalPromise(async (req, res) => {
   const { email, password, name } = req.body;
 
-  if (!(email && password && name && req.files)) {
+  if (!(email && password && name)) {
     return customResponse(res, 400, "Please fill all the details");
   }
 
@@ -16,18 +16,18 @@ exports.signup = GlobalPromise(async (req, res) => {
     return customResponse(res, 400, "User already registered");
   }
 
-  const response = await imageUploader(req, {
-    folder: "users",
-    width: 150,
-    crop: "scale",
-  });
+  if (req.files) {
+    const response = await imageUploader(req, {
+      folder: "users",
+      width: 150,
+      crop: "scale",
+    });
 
-  req.body.photos = {
-    id: response[0].id,
-    secure_url: response[0].secure_url,
-  };
-
-  console.log(req.body.photos);
+    req.body.photos = {
+      id: response[0].id,
+      secure_url: response[0].secure_url,
+    };
+  }
 
   const user = await User.create(req.body);
   const token = user.generateJWT();
