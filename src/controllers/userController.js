@@ -135,5 +135,5 @@ exports.updateName = GlobalPromise(async (req, res) => {
   user.name = name;
   await user.save();
 
-  customResponse(res, 200, "Profile photo updated successfull", user);
+  customResponse(res, 200, "Name updated successfull", user);
 });
