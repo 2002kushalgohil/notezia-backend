@@ -9,5 +9,4 @@ node_modules/
 .vscode-test
 .webpack/
 functions
-# Local Netlify folder
 .netlify

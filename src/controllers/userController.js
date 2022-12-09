@@ -5,9 +5,9 @@ const { customResponse } = require("../utils/responses");
 const emailSender = require("../utils/emailSender");
 
 exports.signup = GlobalPromise(async (req, res) => {
-  const { email, password, name, photos } = req.body;
+  const { email, password, name } = req.body;
 
-  if (!(email && password && name && photos)) {
+  if (!(email && password && name)) {
     return customResponse(res, 400, "Please fill all the details");
   }
 
@@ -83,6 +83,7 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
 
 exports.passwordReset = GlobalPromise(async (req, res) => {
   const token = req.params.token;
+  const { password, confirmpassword } = req.body;
 
   const user = await User.findOne({
     forgotPasswordToken: token,
@@ -93,15 +94,15 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
     return customResponse(res, 400, "Token Expired");
   }
 
-  if (!(req.body.password && req.body.confirmpassword)) {
+  if (!(password && confirmpassword)) {
     return customResponse(res, 400, "Please fill all the details");
   }
 
-  if (req.body.password !== req.body.confirmpassword) {
+  if (password !== confirmpassword) {
     return customResponse(res, 400, "Passwords does not match");
   }
 
-  user.password = req.body.password;
+  user.password = password;
   user.forgotPasswordToken = undefined;
   user.forgotPasswordExpiry = undefined;
   await user.save();

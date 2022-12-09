@@ -28,7 +28,7 @@ router.use("/card/", card);
 router.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Hello there",
+    message: "Hello world",
   });
 });
 
