@@ -124,3 +124,16 @@ exports.updateProfilePhoto = GlobalPromise(async (req, res) => {
 
   customResponse(res, 200, "Profile photo updated successfull", user);
 });
+
+exports.updateName = GlobalPromise(async (req, res) => {
+  const { name } = req.body;
+  if (!name) {
+    return customResponse(res, 400, "Please fill all the details");
+  }
+
+  const user = await User.findById(req.user.id);
+  user.name = name;
+  await user.save();
+
+  customResponse(res, 200, "Profile photo updated successfull", user);
+});
