@@ -20,7 +20,7 @@ exports.signup = GlobalPromise(async (req, res) => {
   user.password = undefined;
 
   const data = { token, user };
-  customResponse(res, 201, "User Registered successfully", data);
+  customResponse(res, 201, "Registration successful", data);
 });
 
 exports.login = GlobalPromise(async (req, res) => {
@@ -33,7 +33,7 @@ exports.login = GlobalPromise(async (req, res) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
-    return customResponse(res, 404, "No user found");
+    return customResponse(res, 404, "Please register first");
   }
 
   const isPassCorrect = await user.isValidPassword(password);
@@ -56,14 +56,14 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
 
   const user = await User.findOne({ email });
   if (!user) {
-    return customResponse(res, 404, "No user found");
+    return customResponse(res, 404, "Please register first");
   }
 
   const forgotToken = user.getForgotPasswordToken();
   await user.save({ validateBeforeSave: false });
   const url = `${req.protocol}://${req.get(
     "host"
-  )}/resetpassword/${forgotToken}`;
+  )}/resetpassword?token=${forgotToken}`;
   const message = `Copy paste this link in your URL and hit enter \n \n ${url}`;
 
   try {
