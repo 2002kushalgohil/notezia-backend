@@ -1,6 +1,6 @@
 const GlobalPromise = require("../middlewares/globalPromise");
 const User = require("../models/userModel");
-
+const https = require("https");
 const { customResponse } = require("../utils/responses");
 const emailSender = require("../utils/emailSender");
 
@@ -46,6 +46,62 @@ exports.login = GlobalPromise(async (req, res) => {
   const data = { token, user };
 
   customResponse(res, 200, "Login Successful", data);
+});
+
+exports.googleAuth = GlobalPromise(async (req, res) => {
+  let googleAuthToken = req.query.googleAuthToken;
+  if (!googleAuthToken) {
+    return customResponse(res, 400, "Please fill all the details");
+  }
+
+  https.get(
+    `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${googleAuthToken}`,
+    (response) => {
+      let data = "";
+      response.on("data", (chunk) => {
+        data += chunk;
+      });
+
+      response.on("end", () => {
+        try {
+          handleGoogleLogin(JSON.parse(data));
+        } catch (error) {
+          console.error(error);
+          handleGoogleLogin(error);
+        }
+      });
+    }
+  );
+
+  const handleGoogleLogin = async (userData) => {
+    if (!userData?.email) {
+      return customResponse(res, 400, "Invalid Token");
+    }
+
+    const user = await User.findOne({ email: userData.email });
+
+    if (!user) {
+      const newUser = await User.create({
+        email: userData.email,
+        password: process.env.JWT_SECRET,
+        name: userData.name,
+        photos: {
+          id: "NA",
+          secure_url: userData.picture,
+        },
+      });
+      const token = newUser.generateJWT();
+      newUser.password = undefined;
+      const data = { token, newUser };
+      return customResponse(res, 201, "Registration successful", data);
+    }
+
+    const token = user.generateJWT();
+    user.password = undefined;
+    const data = { token, user };
+
+    customResponse(res, 200, "Login Successful", data);
+  };
 });
 
 exports.forgotPassword = GlobalPromise(async (req, res) => {
