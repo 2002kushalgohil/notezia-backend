@@ -13,7 +13,7 @@ const {
 
 router.route("/signup").post(signup);
 router.route("/login").post(login);
-router.route("/googleAuth").post(googleAuth);
+router.route("/googleAuth").get(googleAuth);
 router.route("/forgotpassword").post(forgotPassword);
 router.route("/resetpassword/:token").post(passwordReset);
 router.route("/updatename").patch(isLoggedIn, updateName);
