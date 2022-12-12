@@ -169,6 +169,9 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
 });
 
 exports.userProfile = GlobalPromise(async (req, res) => {
+  req.user.forgotPasswordToken = undefined;
+  req.user.forgotPasswordExpiry = undefined;
+  req.user.createdAt = undefined;
   customResponse(res, 200, "User profile", req.user);
 });
 
