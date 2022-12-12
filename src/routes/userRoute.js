@@ -9,6 +9,7 @@ const {
   updateProfilePhoto,
   updateName,
   googleAuth,
+  userProfile,
 } = require("../controllers/userController");
 
 router.route("/signup").post(signup);
@@ -16,6 +17,7 @@ router.route("/login").post(login);
 router.route("/googleAuth").get(googleAuth);
 router.route("/forgotpassword").post(forgotPassword);
 router.route("/resetpassword/:token").post(passwordReset);
+router.route("/userprofile").get(isLoggedIn, userProfile);
 router.route("/updatename").patch(isLoggedIn, updateName);
 
 module.exports = router;

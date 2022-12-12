@@ -168,6 +168,10 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
   customResponse(res, 200, "Password has been reset successfully", data);
 });
 
+exports.userProfile = GlobalPromise(async (req, res) => {
+  customResponse(res, 200, "User profile", req.user);
+});
+
 exports.updateProfilePhoto = GlobalPromise(async (req, res) => {
   const { photos } = req.body;
   if (!photos) {
