@@ -6,8 +6,6 @@ const {
   signup,
   forgotPassword,
   passwordReset,
-  updateProfilePhoto,
-  updateName,
   googleAuth,
   userProfile,
   updateProfile,
