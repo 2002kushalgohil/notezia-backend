@@ -29,7 +29,7 @@ exports.signup = GlobalPromise(async (req, res) => {
     const data = { token, user };
     customResponse(res, 201, "Registration successful", data);
   } catch (error) {
-    return customResponse(res, 400, error);
+    return customResponse(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -58,7 +58,7 @@ exports.login = GlobalPromise(async (req, res) => {
 
     customResponse(res, 200, "Login Successful", data);
   } catch (error) {
-    return customResponse(res, 400, error);
+    return customResponse(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -81,7 +81,6 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
           try {
             handleGoogleLogin(JSON.parse(data));
           } catch (error) {
-            console.error(error);
             handleGoogleLogin(error);
           }
         });
@@ -118,7 +117,7 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
       customResponse(res, 200, "Login Successful", data);
     };
   } catch (error) {
-    return customResponse(res, 400, error);
+    return customResponse(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -159,7 +158,7 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
       return customResponse(res, 400, "Oops! Something went wrong");
     }
   } catch (error) {
-    return customResponse(res, 400, error);
+    return customResponse(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -194,7 +193,7 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
 
     customResponse(res, 200, "Password has been reset successfully", data);
   } catch (error) {
-    return customResponse(res, 400, error);
+    return customResponse(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -205,7 +204,7 @@ exports.userProfile = GlobalPromise(async (req, res) => {
     req.user.createdAt = undefined;
     customResponse(res, 200, "User profile", req.user);
   } catch (error) {
-    return customResponse(res, 400, error);
+    return customResponse(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -220,7 +219,7 @@ exports.updateProfilePhoto = GlobalPromise(async (req, res) => {
 
     customResponse(res, 200, "Profile updated successfull", user);
   } catch (error) {
-    return customResponse(res, 400, error);
+    return customResponse(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -235,6 +234,6 @@ exports.updateProfile = GlobalPromise(async (req, res) => {
 
     customResponse(res, 200, "Profile updated successfull", user);
   } catch (error) {
-    return customResponse(res, 400, error);
+    return customResponse(res, 400, "!Opps something went wrong");
   }
 });
