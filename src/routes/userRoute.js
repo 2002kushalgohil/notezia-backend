@@ -10,14 +10,15 @@ const {
   updateName,
   googleAuth,
   userProfile,
+  updateProfile,
 } = require("../controllers/userController");
 
-router.route("/").get(isLoggedIn, userProfile);
 router.route("/signup").post(signup);
 router.route("/login").post(login);
 router.route("/googleAuth").get(googleAuth);
 router.route("/forgotpassword").post(forgotPassword);
 router.route("/resetpassword/:token").post(passwordReset);
-router.route("/updatename").patch(isLoggedIn, updateName);
+router.route("/").get(isLoggedIn, userProfile);
+router.route("/").patch(isLoggedIn, updateProfile);
 
 module.exports = router;
