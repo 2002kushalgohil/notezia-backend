@@ -18,7 +18,7 @@ router.route("/login").post(login);
 router.route("/googleAuth").get(googleAuth);
 router.route("/forgotpassword").post(forgotPassword);
 router.route("/resetpassword/:token").post(passwordReset);
-router.route("/refreshtoken").post(refreshToken);
+router.route("/refreshtoken").get(refreshToken);
 router.route("/").get(isLoggedIn, userProfile);
 router.route("/").patch(isLoggedIn, updateProfile);
 

@@ -264,7 +264,7 @@ exports.updateProfile = GlobalPromise(async (req, res) => {
 
 exports.refreshToken = GlobalPromise(async (req, res) => {
   try {
-    const { refreshToken } = req.body;
+    let refreshToken = req.query.refreshToken;
 
     if (!refreshToken) {
       return customResponse(res, 400, "Please fill all the details");
