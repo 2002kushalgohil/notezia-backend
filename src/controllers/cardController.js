@@ -27,7 +27,7 @@ exports.getSpecificCards = GlobalPromise(async (req, res) => {
   const card = await Card.findById(id);
 
   if (!card) {
-    customResponse(res, 404, "Card not found");
+    customResponse(res, 400, "Card not found");
   }
 
   customResponse(res, 200, "", card);
@@ -47,7 +47,7 @@ exports.editCard = GlobalPromise(async (req, res) => {
   });
 
   if (!card) {
-    return customResponse(res, 404, "Card not found");
+    return customResponse(res, 400, "Card not found");
   }
 
   customResponse(res, 200, "Card Successfully Edited", card);
@@ -63,7 +63,7 @@ exports.deleteCard = GlobalPromise(async (req, res) => {
   const card = await Card.findById(id);
 
   if (!card) {
-    return customResponse(res, 404, "Card not found");
+    return customResponse(res, 400, "Card not found");
   }
 
   await Card.findByIdAndDelete(id);

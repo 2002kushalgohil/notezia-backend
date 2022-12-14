@@ -6,18 +6,22 @@ const jwt = require("jsonwebtoken");
 // -------------------- Validate token --------------------
 exports.isLoggedIn = GlobalPromise(async (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
-  if (!token) {
-    return customResponse(res, 404, "Invalid token");
+  try {
+    if (!token) {
+      return customResponse(res, 403, "Invalid token");
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return customResponse(res, 403, "Invalid token");
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    return customResponse(res, 403, "Token expired");
   }
-
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-  const user = await User.findById(decoded.id);
-
-  if (!user) {
-    return customResponse(res, 404, "Invalid token");
-  }
-
-  req.user = user;
-  next();
 });

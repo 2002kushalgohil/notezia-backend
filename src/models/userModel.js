@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema({
 
   forgotPasswordToken: String,
   forgotPasswordExpiry: Date,
+  refreshToken: {
+    type: String,
+    default: "",
+  },
 
   createdAt: {
     type: Date,
@@ -59,6 +63,13 @@ userSchema.methods.isValidPassword = async function (userPassword) {
 userSchema.methods.generateJWT = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRY,
+  });
+};
+
+// -------------------- Refresh token generation --------------------
+userSchema.methods.generateRefreshToken = function () {
+  return jwt.sign({ id: this._id }, process.env.REFRESHTOKEN_SECRET, {
+    expiresIn: process.env.REFRESHTOKEN_EXPIRY,
   });
 };
 
