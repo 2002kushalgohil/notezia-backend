@@ -15,7 +15,7 @@ const emailSender = async (option) => {
     from: "2002kushalgohil@gmail.com",
     to: option.email,
     subject: option.subject,
-    text: option.message,
+    html: option.message,
   };
   await transporter.sendMail(message);
 };

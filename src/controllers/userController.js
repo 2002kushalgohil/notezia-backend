@@ -141,16 +141,23 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
     // -------------------- Generate forgot password token --------------------
     const forgotToken = user.getForgotPasswordToken();
     await user.save({ validateBeforeSave: false });
-    const url = `${req.protocol}://${req.get(
-      "host"
-    )}/resetpassword?token=${forgotToken}`;
-    const message = `Copy paste this link in your URL and hit enter \n \n ${url}`;
+    const url = `https://notezia.kushalgohil.com/resetpassword?token=${forgotToken}`;
+
+    const message = `
+        <p>Trouble signing in?</p>
+        <p>Resetting your password is easy.</p>
+        <p>
+          Just click on the link below and follow the instructions. We’ll have
+          you up and running in no time.
+        </p>
+        <a href=${url}>${url}</a>
+        <p>If you did not make this request then please ignore this email.</p>`;
 
     // -------------------- Sending a email with token --------------------
     try {
       await emailSender({
         email: user.email,
-        subject: "Password reset email",
+        subject: "Here's how to reset your password",
         message,
       });
       customResponse(
