@@ -178,12 +178,12 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
 
 exports.passwordReset = GlobalPromise(async (req, res) => {
   try {
-    const token = req.params.token;
+    const paramToken = req.params.token;
     const { password, confirmpassword } = req.body;
 
     // -------------------- Finding a user  --------------------
     const user = await User.findOne({
-      forgotPasswordToken: token,
+      forgotPasswordToken: paramToken,
       forgotPasswordExpiry: { $gt: Date.now() },
     });
 
@@ -203,8 +203,8 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
     user.forgotPasswordToken = undefined;
     user.forgotPasswordExpiry = undefined;
     await user.save();
-    const jwtToken = user.generateJWT();
-    const data = { jwtToken, user };
+    const token = user.generateJWT();
+    const data = { token, user };
 
     customResponse(res, 200, "Password has been reset successfully", data);
   } catch (error) {
