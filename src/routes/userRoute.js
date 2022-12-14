@@ -11,6 +11,7 @@ const {
   updateProfile,
 } = require("../controllers/userController");
 
+// -------------------- User Routes --------------------
 router.route("/signup").post(signup);
 router.route("/login").post(login);
 router.route("/googleAuth").get(googleAuth);

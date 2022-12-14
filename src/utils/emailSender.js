@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 
+// -------------------- Send Email using nodemailer --------------------
 const emailSender = async (option) => {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,

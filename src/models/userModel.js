@@ -42,6 +42,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+// -------------------- Password hashing before creating and forgetting password --------------------
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     return next();
@@ -49,16 +50,19 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
+// -------------------- Validate password --------------------
 userSchema.methods.isValidPassword = async function (userPassword) {
   return await bcrypt.compare(userPassword, this.password);
 };
 
+// -------------------- JWT token generation --------------------
 userSchema.methods.generateJWT = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRY,
   });
 };
 
+// -------------------- Forgot password token generation --------------------
 userSchema.methods.getForgotPasswordToken = function () {
   const forgotToken = crypto.randomBytes(20).toString("hex");
   this.forgotPasswordToken = forgotToken;

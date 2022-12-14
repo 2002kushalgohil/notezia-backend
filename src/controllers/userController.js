@@ -16,6 +16,7 @@ exports.signup = GlobalPromise(async (req, res) => {
       return customResponse(res, 400, "User already registered");
     }
 
+    // -------------------- Setting default profile picture --------------------
     req.body.photos = {
       id: "NA",
       secure_url:
@@ -69,6 +70,7 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
       return customResponse(res, 400, "Please fill all the details");
     }
 
+    // -------------------- Getting user data from access token --------------------
     https.get(
       `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${googleAuthToken}`,
       (response) => {
@@ -94,6 +96,7 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
 
       const user = await User.findOne({ email: userData.email });
 
+      // -------------------- If not registered then register the user --------------------
       if (!user) {
         const newUser = await User.create({
           email: userData.email,
@@ -104,6 +107,8 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
             secure_url: userData.picture,
           },
         });
+
+        // -------------------- Send the user access token --------------------
         const token = newUser.generateJWT();
         newUser.password = undefined;
         const data = { token, newUser };
@@ -133,6 +138,7 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
       return customResponse(res, 404, "Please register first");
     }
 
+    // -------------------- Generate forgot password token --------------------
     const forgotToken = user.getForgotPasswordToken();
     await user.save({ validateBeforeSave: false });
     const url = `${req.protocol}://${req.get(
@@ -140,6 +146,7 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
     )}/resetpassword?token=${forgotToken}`;
     const message = `Copy paste this link in your URL and hit enter \n \n ${url}`;
 
+    // -------------------- Sending a email with token --------------------
     try {
       await emailSender({
         email: user.email,
@@ -167,6 +174,7 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
     const token = req.params.token;
     const { password, confirmpassword } = req.body;
 
+    // -------------------- Finding a user  --------------------
     const user = await User.findOne({
       forgotPasswordToken: token,
       forgotPasswordExpiry: { $gt: Date.now() },
@@ -203,21 +211,6 @@ exports.userProfile = GlobalPromise(async (req, res) => {
     req.user.forgotPasswordExpiry = undefined;
     req.user.createdAt = undefined;
     customResponse(res, 200, "User profile", req.user);
-  } catch (error) {
-    return customResponse(res, 400, "!Opps something went wrong");
-  }
-});
-
-exports.updateProfilePhoto = GlobalPromise(async (req, res) => {
-  try {
-    const { photos, name } = req.body;
-
-    const user = await User.findById(req.user.id);
-    user.photos = photos;
-    user.name = name;
-    await user.save();
-
-    customResponse(res, 200, "Profile updated successfull", user);
   } catch (error) {
     return customResponse(res, 400, "!Opps something went wrong");
   }

@@ -1,3 +1,4 @@
+// -------------------- Custom default response structure --------------------
 exports.customResponse = (res, code, message, data) => {
   res.status(code).json({
     status: code,
