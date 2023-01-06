@@ -68,7 +68,6 @@ exports.login = GlobalPromise(async (req, res) => {
 
     customResponse(res, 200, "Login Successful", data);
   } catch (error) {
-    console.log(error);
     return customResponse(res, 400, "!Opps something went wrong");
   }
 });
@@ -120,10 +119,10 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
 
         // -------------------- Send the user access token --------------------
         const accessToken = newUser.generateJWT();
-        const refreshToken = user.generateRefreshToken();
+        const refreshToken = newUser.generateRefreshToken();
 
-        user.refreshToken = refreshToken;
-        await user.save();
+        newUser.refreshToken = refreshToken;
+        await newUser.save();
 
         const data = { accessToken, refreshToken };
 
@@ -290,7 +289,6 @@ exports.refreshToken = GlobalPromise(async (req, res) => {
 
     customResponse(res, 200, "New Token generated", data);
   } catch (error) {
-    console.log(error);
     return customResponse(res, 400, "Refresh Token expired");
   }
 });

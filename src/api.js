@@ -25,11 +25,9 @@ app.use(cookieParser());
 
 // -------------------- Routes path --------------------
 const user = require("./routes/userRoute");
-const card = require("./routes/cardRoute");
 
 // -------------------- Routes --------------------
 router.use("/user/", user);
-router.use("/card/", card);
 
 // -------------------- Redirect route to netlify functions --------------------
 app.use(`/.netlify/functions/api`, router);
