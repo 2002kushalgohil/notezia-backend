@@ -1,7 +1,7 @@
 const GlobalPromise = require("../middlewares/globalPromise");
 const User = require("../models/userModel");
 const https = require("https");
-const { customResponse } = require("../utils/responses");
+const { response } = require("../utils/responses");
 const emailSender = require("../utils/emailSender");
 const jwt = require("jsonwebtoken");
 
@@ -10,11 +10,11 @@ exports.signup = GlobalPromise(async (req, res) => {
     const { email, password, name } = req.body;
 
     if (!(email && password && name)) {
-      return customResponse(res, 400, "Please fill all the details");
+      return response(res, 400, "Please fill all the details");
     }
 
     if (await User.findOne({ email })) {
-      return customResponse(res, 400, "User already registered");
+      return response(res, 400, "User already registered");
     }
 
     // -------------------- Setting default profile picture --------------------
@@ -27,15 +27,14 @@ exports.signup = GlobalPromise(async (req, res) => {
     const user = await User.create(req.body);
     const accessToken = user.generateJWT();
     const refreshToken = user.generateRefreshToken();
-
     user.refreshToken = refreshToken;
     await user.save();
 
     const data = { accessToken, refreshToken };
 
-    customResponse(res, 201, "Registration successful", data);
+    return response(res, 201, "Registration successful", data);
   } catch (error) {
-    return customResponse(res, 400, "!Opps something went wrong");
+    return response(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -44,31 +43,30 @@ exports.login = GlobalPromise(async (req, res) => {
     const { email, password } = req.body;
 
     if (!(email && password)) {
-      return customResponse(res, 400, "Please fill all the details");
+      return response(res, 400, "Please fill all the details");
     }
 
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
-      return customResponse(res, 400, "Please register first");
+      return response(res, 400, "Please register first");
     }
 
     const isPassCorrect = await user.isValidPassword(password);
     if (!isPassCorrect) {
-      return customResponse(res, 400, "Invalid credentials");
+      return response(res, 400, "Invalid credentials");
     }
 
     const accessToken = user.generateJWT();
     const refreshToken = user.generateRefreshToken();
-
     user.refreshToken = refreshToken;
     await user.save();
 
     const data = { accessToken, refreshToken };
 
-    customResponse(res, 200, "Login Successful", data);
+    response(res, 200, "Login Successful", data);
   } catch (error) {
-    return customResponse(res, 400, "!Opps something went wrong");
+    return response(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -76,7 +74,7 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
   try {
     let googleAuthToken = req.query.googleAuthToken;
     if (!googleAuthToken) {
-      return customResponse(res, 400, "Please fill all the details");
+      return response(res, 400, "Please fill all the details");
     }
 
     // -------------------- Getting user data from access token --------------------
@@ -100,7 +98,7 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
 
     const handleGoogleLogin = async (userData) => {
       if (!userData?.email) {
-        return customResponse(res, 400, "Invalid Token");
+        return response(res, 400, "Invalid Token");
       }
 
       const user = await User.findOne({ email: userData.email });
@@ -126,21 +124,20 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
 
         const data = { accessToken, refreshToken };
 
-        return customResponse(res, 201, "Registration successful", data);
+        return response(res, 201, "Registration successful", data);
       }
 
       const accessToken = user.generateJWT();
       const refreshToken = user.generateRefreshToken();
-
       user.refreshToken = refreshToken;
       await user.save();
 
       const data = { accessToken, refreshToken };
 
-      customResponse(res, 200, "Login Successful", data);
+      response(res, 200, "Login Successful", data);
     };
   } catch (error) {
-    return customResponse(res, 400, "!Opps something went wrong");
+    return response(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -148,12 +145,12 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
-      return customResponse(res, 400, "Please fill all the details");
+      return response(res, 400, "Please fill all the details");
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return customResponse(res, 400, "Please register first");
+      return response(res, 400, "Please register first");
     }
 
     // -------------------- Generate forgot password token --------------------
@@ -178,19 +175,15 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
         subject: "Here's how to reset your password",
         message,
       });
-      customResponse(
-        res,
-        200,
-        "Please check your email to reset your password"
-      );
+      response(res, 200, "Please check your email to reset your password");
     } catch (error) {
       user.forgotPasswordExpiry = undefined;
       user.forgotPasswordToken = undefined;
       user.save({ validateBeforeSave: true });
-      return customResponse(res, 400, "Oops! Something went wrong");
+      return response(res, 400, "Oops! Something went wrong");
     }
   } catch (error) {
-    return customResponse(res, 400, "!Opps something went wrong");
+    return response(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -206,32 +199,31 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
     });
 
     if (!user) {
-      return customResponse(res, 400, "Token Expired");
+      return response(res, 400, "Token Expired");
     }
 
     if (!(password && confirmpassword)) {
-      return customResponse(res, 400, "Please fill all the details");
+      return response(res, 400, "Please fill all the details");
     }
 
     if (password !== confirmpassword) {
-      return customResponse(res, 400, "Passwords does not match");
+      return response(res, 400, "Passwords does not match");
     }
 
     user.password = password;
     user.forgotPasswordToken = undefined;
     user.forgotPasswordExpiry = undefined;
-    // await user.save();
+
     const accessToken = user.generateJWT();
     const refreshToken = user.generateRefreshToken();
-
     user.refreshToken = refreshToken;
     await user.save();
 
     const data = { accessToken, refreshToken, user };
 
-    customResponse(res, 200, "Password has been reset successfully", data);
+    response(res, 200, "Password has been reset successfully", data);
   } catch (error) {
-    return customResponse(res, 400, "!Opps something went wrong");
+    return response(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -240,9 +232,9 @@ exports.userProfile = GlobalPromise(async (req, res) => {
     req.user.forgotPasswordToken = undefined;
     req.user.forgotPasswordExpiry = undefined;
     req.user.createdAt = undefined;
-    customResponse(res, 200, "User profile", req.user);
+    response(res, 200, "User profile", req.user);
   } catch (error) {
-    return customResponse(res, 400, "!Opps something went wrong");
+    return response(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -255,9 +247,9 @@ exports.updateProfile = GlobalPromise(async (req, res) => {
     user.photos = photos;
     await user.save();
 
-    customResponse(res, 200, "Profile updated successfull", user);
+    response(res, 200, "Profile updated successfull", user);
   } catch (error) {
-    return customResponse(res, 400, "!Opps something went wrong");
+    return response(res, 400, "!Opps something went wrong");
   }
 });
 
@@ -266,7 +258,7 @@ exports.refreshToken = GlobalPromise(async (req, res) => {
     let refreshToken = req.query.refreshToken;
 
     if (!refreshToken) {
-      return customResponse(res, 400, "Please fill all the details");
+      return response(res, 400, "Please fill all the details");
     }
 
     const isTokenValid = jwt.verify(
@@ -277,18 +269,17 @@ exports.refreshToken = GlobalPromise(async (req, res) => {
     const user = await User.findOne({ id: isTokenValid.id, refreshToken });
 
     if (!user) {
-      return customResponse(res, 400, "Invalid token");
+      return response(res, 400, "Invalid token");
     }
 
     const accessToken = user.generateJWT();
     const newRefreshToken = user.generateRefreshToken();
     const data = { accessToken, refreshToken: newRefreshToken, user };
-
     user.refreshToken = newRefreshToken;
     await user.save();
 
-    customResponse(res, 200, "New Token generated", data);
+    response(res, 200, "New Token generated", data);
   } catch (error) {
-    return customResponse(res, 400, "Refresh Token expired");
+    return response(res, 400, "Refresh Token expired");
   }
 });
