@@ -4,6 +4,7 @@ const https = require("https");
 const { response } = require("../utils/responses");
 const emailSender = require("../utils/emailSender");
 const jwt = require("jsonwebtoken");
+const { resetPassword } = require("../utils/emailTemplates");
 
 exports.signup = GlobalPromise(async (req, res) => {
   try {
@@ -158,21 +159,13 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
     await user.save({ validateBeforeSave: false });
     const url = `https://notezia.kushalgohil.com/resetpassword?token=${forgotToken}`;
 
-    const message = `
-        <p>Trouble signing in?</p>
-        <p>Resetting your password is easy.</p>
-        <p>
-          Just click on the link below and follow the instructions. We’ll have
-          you up and running in no time.
-        </p>
-        <a href=${url}>${url}</a>
-        <p>If you did not make this request then please ignore this email.</p>`;
+    const message = resetPassword(url);
 
     // -------------------- Sending a email with token --------------------
     try {
       await emailSender({
         email: user.email,
-        subject: "Here's how to reset your password",
+        subject: "Notezia: Here's how to reset your password",
         message,
       });
       response(res, 200, "Please check your email to reset your password");
