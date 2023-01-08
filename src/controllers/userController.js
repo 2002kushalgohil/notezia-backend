@@ -240,12 +240,9 @@ exports.userProfile = GlobalPromise(async (req, res) => {
 
 exports.updateProfile = GlobalPromise(async (req, res) => {
   try {
-    const { photos, name } = req.body;
-
-    const user = await User.findById(req.user.id);
-    user.name = name;
-    user.photos = photos;
-    await user.save();
+    const user = await User.findByIdAndUpdate(req.user.id, req.body, {
+      returnDocument: "after",
+    });
 
     response(res, 200, "Profile updated successfull", user);
   } catch (error) {
