@@ -271,7 +271,7 @@ exports.refreshToken = GlobalPromise(async (req, res) => {
 
     const accessToken = user.generateJWT();
     const newRefreshToken = user.generateRefreshToken();
-    const data = { accessToken, refreshToken: newRefreshToken, user };
+    const data = { accessToken, refreshToken: newRefreshToken };
     user.refreshToken = newRefreshToken;
     await user.save();
 
