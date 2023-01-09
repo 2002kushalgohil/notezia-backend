@@ -1,4 +1,4 @@
-const { customResponse } = require("../utils/responses");
+const { response } = require("../utils/responses");
 const GlobalPromise = require("./globalPromise");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
@@ -8,7 +8,7 @@ exports.isLoggedIn = GlobalPromise(async (req, res, next) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
   try {
     if (!token) {
-      return customResponse(res, 403, "Invalid token");
+      return response(res, 403, "Invalid token");
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -16,12 +16,12 @@ exports.isLoggedIn = GlobalPromise(async (req, res, next) => {
     const user = await User.findById(decoded.id);
 
     if (!user) {
-      return customResponse(res, 403, "Invalid token");
+      return response(res, 403, "Invalid token");
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return customResponse(res, 403, "Token expired");
+    return response(res, 403, "Token expired");
   }
 });
