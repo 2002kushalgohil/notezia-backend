@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema({
     },
   },
 
+  cards: [
+    {
+      type: mongoose.Schema.ObjectId,
+    },
+  ],
+
   forgotPasswordToken: String,
   forgotPasswordExpiry: Date,
   refreshToken: {
