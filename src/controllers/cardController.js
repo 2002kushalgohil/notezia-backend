@@ -109,10 +109,15 @@ exports.deleteCard = globalPromise(async (req, res) => {
 exports.editCardPriority = globalPromise(async (req, res) => {
   try {
     const { cards } = req.body;
+
+    if (!cards) {
+      return response(res, 400, "Please fill all the details");
+    }
+
     req.user.cards = cards;
     await req.user.save();
 
-    return response(res, 400, "Card priority changed");
+    return response(res, 200, "Card priority changed");
   } catch (error) {
     return response(res, 400, "!Opps something went wrong");
   }
