@@ -11,7 +11,7 @@ exports.signup = GlobalPromise(async (req, res) => {
     const { email, password, name } = req.body;
 
     if (!(email && password && name)) {
-      return response(res, 400, "Please fill all the details");
+      return response(res, 400, "Please provide all required details");
     }
 
     if (await User.findOne({ email })) {
@@ -35,7 +35,11 @@ exports.signup = GlobalPromise(async (req, res) => {
 
     return response(res, 201, "Registration successful", data);
   } catch (error) {
-    return response(res, 400, "!Opps something went wrong");
+    return response(
+      res,
+      400,
+      "An error occurred while processing your request"
+    );
   }
 });
 
@@ -44,7 +48,7 @@ exports.login = GlobalPromise(async (req, res) => {
     const { email, password } = req.body;
 
     if (!(email && password)) {
-      return response(res, 400, "Please fill all the details");
+      return response(res, 400, "Please provide all required details");
     }
 
     const user = await User.findOne({ email }).select("+password");
@@ -67,7 +71,11 @@ exports.login = GlobalPromise(async (req, res) => {
 
     response(res, 200, "Login Successful", data);
   } catch (error) {
-    return response(res, 400, "!Opps something went wrong");
+    return response(
+      res,
+      400,
+      "An error occurred while processing your request"
+    );
   }
 });
 
@@ -75,7 +83,7 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
   try {
     let googleAuthToken = req.query.googleAuthToken;
     if (!googleAuthToken) {
-      return response(res, 400, "Please fill all the details");
+      return response(res, 400, "Please provide all required details");
     }
 
     // -------------------- Getting user data from access token --------------------
@@ -138,7 +146,11 @@ exports.googleAuth = GlobalPromise(async (req, res) => {
       response(res, 200, "Login Successful", data);
     };
   } catch (error) {
-    return response(res, 400, "!Opps something went wrong");
+    return response(
+      res,
+      400,
+      "An error occurred while processing your request"
+    );
   }
 });
 
@@ -146,7 +158,7 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
-      return response(res, 400, "Please fill all the details");
+      return response(res, 400, "Please provide all required details");
     }
 
     const user = await User.findOne({ email });
@@ -161,7 +173,7 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
 
     const message = resetPassword(url);
 
-    // -------------------- Sending a email with token --------------------
+    // -------------------- Sending a email with forgot password token --------------------
     try {
       await emailSender({
         email: user.email,
@@ -176,7 +188,11 @@ exports.forgotPassword = GlobalPromise(async (req, res) => {
       return response(res, 400, "Oops! Something went wrong");
     }
   } catch (error) {
-    return response(res, 400, "!Opps something went wrong");
+    return response(
+      res,
+      400,
+      "An error occurred while processing your request"
+    );
   }
 });
 
@@ -196,7 +212,7 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
     }
 
     if (!(password && confirmpassword)) {
-      return response(res, 400, "Please fill all the details");
+      return response(res, 400, "Please provide all required details");
     }
 
     if (password !== confirmpassword) {
@@ -216,7 +232,11 @@ exports.passwordReset = GlobalPromise(async (req, res) => {
 
     response(res, 200, "Password has been reset successfully", data);
   } catch (error) {
-    return response(res, 400, "!Opps something went wrong");
+    return response(
+      res,
+      400,
+      "An error occurred while processing your request"
+    );
   }
 });
 
@@ -228,7 +248,11 @@ exports.userProfile = GlobalPromise(async (req, res) => {
     req.user.refreshToken = undefined;
     response(res, 200, "User profile", req.user);
   } catch (error) {
-    return response(res, 400, "!Opps something went wrong");
+    return response(
+      res,
+      400,
+      "An error occurred while processing your request"
+    );
   }
 });
 
@@ -240,7 +264,11 @@ exports.updateProfile = GlobalPromise(async (req, res) => {
 
     response(res, 200, "Profile updated successfull", user);
   } catch (error) {
-    return response(res, 400, "!Opps something went wrong");
+    return response(
+      res,
+      400,
+      "An error occurred while processing your request"
+    );
   }
 });
 
@@ -249,28 +277,35 @@ exports.refreshToken = GlobalPromise(async (req, res) => {
     let refreshToken = req.query.refreshToken;
 
     if (!refreshToken) {
-      return response(res, 400, "Please fill all the details");
+      return response(res, 400, "Please provide a refresh token");
     }
 
-    const isTokenValid = jwt.verify(
-      refreshToken,
-      process.env.REFRESHTOKEN_SECRET
-    );
+    try {
+      const isTokenValid = jwt.verify(
+        refreshToken,
+        process.env.REFRESHTOKEN_SECRET
+      );
 
-    const user = await User.findOne({ id: isTokenValid.id, refreshToken });
+      const user = await User.findOne({ _id: isTokenValid.id, refreshToken });
 
-    if (!user) {
-      return response(res, 400, "Invalid token");
+      if (!user) {
+        return response(res, 400, "Invalid refresh token");
+      }
+      const accessToken = user.generateJWT();
+      const newRefreshToken = user.generateRefreshToken();
+      const data = { accessToken, refreshToken: newRefreshToken };
+      user.refreshToken = newRefreshToken;
+      await user.save();
+
+      response(res, 200, "New Token generated", data);
+    } catch (error) {
+      return response(res, 400, "Refresh token expired or invalid");
     }
-
-    const accessToken = user.generateJWT();
-    const newRefreshToken = user.generateRefreshToken();
-    const data = { accessToken, refreshToken: newRefreshToken };
-    user.refreshToken = newRefreshToken;
-    await user.save();
-
-    response(res, 200, "New Token generated", data);
   } catch (error) {
-    return response(res, 400, "Refresh Token expired");
+    return response(
+      res,
+      400,
+      "An error occurred while processing your request"
+    );
   }
 });

@@ -10,27 +10,19 @@ const router = express.Router();
 // -------------------- DB connection --------------------
 connectWithDB();
 
-// -------------------- CORS --------------------
-app.use(
-  cors({
-    origin: "*",
-  })
-);
-
 // -------------------- Middlewares --------------------
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// -------------------- Routes path --------------------
+// -------------------- Routes --------------------
 const user = require("./routes/userRoute");
 const card = require("./routes/cardRoute");
-
-// -------------------- Routes --------------------
 router.use("/user/", user);
 router.use("/card/", card);
 
-// -------------------- Redirect route to netlify functions --------------------
+// -------------------- Redirect route to Lamda functions --------------------
 app.use(`/.netlify/functions/api`, router);
 
 // -------------------- Serverless app for netlify --------------------

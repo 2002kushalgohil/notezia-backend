@@ -12,14 +12,16 @@ const {
   refreshToken,
 } = require("../controllers/userController");
 
-// -------------------- User Routes --------------------
-router.route("/signup").post(signup);
-router.route("/login").post(login);
-router.route("/googleAuth").get(googleAuth);
-router.route("/forgotpassword").post(forgotPassword);
-router.route("/resetpassword/:token").post(passwordReset);
-router.route("/refreshtoken").get(refreshToken);
-router.route("/").get(isLoggedIn, userProfile);
-router.route("/").patch(isLoggedIn, updateProfile);
+// ------------------------ Auth Routes ------------------------
+router.post("/signup", signup);
+router.post("/login", login);
+router.get("/googleAuth", googleAuth);
+router.post("/forgotpassword", forgotPassword);
+router.post("/resetpassword/:token", passwordReset);
+router.get("/refreshtoken", refreshToken);
+
+// ------------------------ User Routes ------------------------
+router.get("/", isLoggedIn, userProfile);
+router.patch("/", isLoggedIn, updateProfile);
 
 module.exports = router;

@@ -111,7 +111,7 @@ exports.editCardPriority = globalPromise(async (req, res) => {
     const { cards } = req.body;
 
     if (!cards) {
-      return response(res, 400, "Please fill all the details");
+      return response(res, 400, "Please provide all required details");
     }
 
     req.user.cards = cards;

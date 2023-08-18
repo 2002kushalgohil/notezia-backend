@@ -83,7 +83,7 @@ userSchema.methods.generateRefreshToken = function () {
 userSchema.methods.getForgotPasswordToken = function () {
   const forgotToken = crypto.randomBytes(20).toString("hex");
   this.forgotPasswordToken = forgotToken;
-  this.forgotPasswordExpiry = Date.now() + 20 * 60 * 1000;
+  this.forgotPasswordExpiry = new Date(Date.now() + 20 * 60 * 1000);
 
   return forgotToken;
 };
